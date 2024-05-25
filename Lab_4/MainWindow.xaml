@@ -1,0 +1,42 @@
+﻿<Window x:Class="IntegralCalculatorApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:thrd="clr-namespace:System.ComponentModel;assembly=System"
+        Title="MainWindow" Height="350" Width="525">
+    <Window.Resources>
+        <thrd:BackgroundWorker x:Key="worker"
+            DoWork="BackgroundWorker_DoWork"
+            ProgressChanged="BackgroundWorker_ProgressChanged"
+            RunWorkerCompleted="BackgroundWorker_RunWorkerCompleted"
+            WorkerReportsProgress="True"/>
+    </Window.Resources>
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Text="Lower Limit:" Grid.Row="0" Grid.Column="0" Margin="5"/>
+        <TextBox Name="LowerLimitTextBox" Grid.Row="0" Grid.Column="1" Margin="5"/>
+
+        <TextBlock Text="Upper Limit:" Grid.Row="1" Grid.Column="0" Margin="5"/>
+        <TextBox Name="UpperLimitTextBox" Grid.Row="1" Grid.Column="1" Margin="5"/>
+
+        <TextBlock Text="Number of Intervals:" Grid.Row="2" Grid.Column="0" Margin="5"/>
+        <TextBox Name="IntervalsTextBox" Grid.Row="2" Grid.Column="1" Margin="5"/>
+
+        <ProgressBar Name="ProgressBar" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Height="25" Margin="5"/>
+
+        <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="5">
+            <Button Name="StartDispatcherButton" Content="Start with Dispatcher" Width="150" Margin="5" Click="StartDispatcherButton_Click"/>
+            <Button Name="StartBackgroundWorkerButton" Content="Start with BackgroundWorker" Width="150" Margin="5" Click="StartBackgroundWorkerButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>
