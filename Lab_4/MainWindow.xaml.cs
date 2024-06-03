@@ -9,6 +9,8 @@ namespace IntegralCalculatorApp
     public partial class MainWindow : Window
     {
         BackgroundWorker backgroundWorker;
+        double lowerLimit, upperLimit;
+        int intervals;
 
         public MainWindow()
         {
@@ -18,15 +20,11 @@ namespace IntegralCalculatorApp
 
         private async void StartDispatcherButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!ValidateInput())
+            if (!ShowInputWindow())
                 return;
 
             StartDispatcherButton.IsEnabled = false;
             StartBackgroundWorkerButton.IsEnabled = false;
-
-            double lowerLimit = double.Parse(LowerLimitTextBox.Text);
-            double upperLimit = double.Parse(UpperLimitTextBox.Text);
-            int intervals = int.Parse(IntervalsTextBox.Text);
 
             await CalculateAsync(lowerLimit, upperLimit, intervals);
         }
@@ -69,15 +67,11 @@ namespace IntegralCalculatorApp
 
         private void StartBackgroundWorkerButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!ValidateInput())
+            if (!ShowInputWindow())
                 return;
 
             StartDispatcherButton.IsEnabled = false;
             StartBackgroundWorkerButton.IsEnabled = false;
-
-            double lowerLimit = double.Parse(LowerLimitTextBox.Text);
-            double upperLimit = double.Parse(UpperLimitTextBox.Text);
-            int intervals = int.Parse(IntervalsTextBox.Text);
 
             backgroundWorker.RunWorkerAsync(new Tuple<double, double, int>(lowerLimit, upperLimit, intervals));
         }
@@ -95,6 +89,12 @@ namespace IntegralCalculatorApp
 
             for (int i = 0; i <= intervals; i++)
             {
+                if (backgroundWorker.CancellationPending)
+                {
+                    e.Cancel = true;
+                    return;
+                }
+
                 double x = lowerLimit + i * stepSize;
                 double y = Function(x);
                 result += y * stepSize;
@@ -119,28 +119,36 @@ namespace IntegralCalculatorApp
             ProgressBar.Value = 100;
             StartDispatcherButton.IsEnabled = true;
             StartBackgroundWorkerButton.IsEnabled = true;
-            MessageBox.Show($"Integral Result (BackgroundWorker): {e.Result}");
+
+            if (e.Cancelled)
+            {
+                MessageBox.Show("Operation was cancelled.");
+            }
+            else
+            {
+                MessageBox.Show($"Integral Result (BackgroundWorker): {e.Result}");
+            }
         }
 
-        private bool ValidateInput()
+        private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(LowerLimitTextBox.Text) ||
-                string.IsNullOrWhiteSpace(UpperLimitTextBox.Text) ||
-                string.IsNullOrWhiteSpace(IntervalsTextBox.Text))
+            if (backgroundWorker.IsBusy)
             {
-                MessageBox.Show("All fields must be filled in.", "Input Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return false;
+                backgroundWorker.CancelAsync();
             }
+        }
 
-            if (!double.TryParse(LowerLimitTextBox.Text, out _) ||
-                !double.TryParse(UpperLimitTextBox.Text, out _) ||
-                !int.TryParse(IntervalsTextBox.Text, out _))
+        private bool ShowInputWindow()
+        {
+            var inputWindow = new InputWindow();
+            if (inputWindow.ShowDialog() == true)
             {
-                MessageBox.Show("Please enter valid numerical values.", "Input Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return false;
+                lowerLimit = inputWindow.LowerLimit;
+                upperLimit = inputWindow.UpperLimit;
+                intervals = inputWindow.Intervals;
+                return true;
             }
-
-            return true;
+            return false;
         }
     }
 }
